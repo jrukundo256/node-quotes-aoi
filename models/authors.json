@@ -1,2 +1,18 @@
-// authors.json
-[]
+[
+    {
+      "id": 1,
+      "name": "Albert Einstein",
+      "bio": "A theoretical physicist who developed the theory of relativity."
+    },
+    {
+      "id": 2,
+      "name": "Maya Angelou",
+      "bio": "An American poet, memoirist, and civil rights activist."
+    },
+    {
+      "id": 3,
+      "name": "Mark Twain",
+      "bio": "An American writer, humorist, entrepreneur, publisher, and lecturer."
+    }
+  ]
+  

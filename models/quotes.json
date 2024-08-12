@@ -1,1 +1,18 @@
-[]
+[
+    {
+      "id": 1,
+      "authorId": 1,
+      "quote": "Life is like riding a bicycle. To keep your balance, you must keep moving."
+    },
+    {
+      "id": 2,
+      "authorId": 2,
+      "quote": "You will face many defeats in life, but never let yourself be defeated."
+    },
+    {
+      "id": 3,
+      "authorId": 3,
+      "quote": "The secret of getting ahead is getting started."
+    }
+  ]
+  
