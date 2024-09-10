@@ -1,88 +1,88 @@
-const fs = require('fs');
-const path = require('path');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
-const authorsFilePath = path.join(__dirname, '../models/authors.json');
-
-const getAuthors = (req, res) => {
-  fs.readFile(authorsFilePath, 'utf8', (err, data) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to read authors data' });
-    }
-    const authors = JSON.parse(data);
+const getAuthors = async (req, res) => {
+  try {
+    const authors = await prisma.author.findMany();
     res.json(authors);
-  });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch authors..' });
+  }
 };
 
-const getAuthorById = (req, res) => {
+const getAuthorById = async (req, res) => {
   const authorId = parseInt(req.params.id, 10);
-  fs.readFile(authorsFilePath, 'utf8', (err, data) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to read authors data' });
-    }
-    const authors = JSON.parse(data);
-    const author = authors.find(a => a.id === authorId);
+  try {
+    const author = await prisma.author.findUnique({
+      where: { id: authorId },
+    });
     if (!author) {
       return res.status(404).json({ error: 'Author not found' });
     }
     res.json(author);
-  });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch author' });
+  }
 };
 
-const createAuthor = (req, res) => {
-  const newAuthor = req.body;
-  fs.readFile(authorsFilePath, 'utf8', (err, data) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to read authors data' });
-    }
-    const authors = JSON.parse(data);
-    newAuthor.id = authors.length ? authors[authors.length - 1].id + 1 : 1;
-    authors.push(newAuthor);
-    fs.writeFile(authorsFilePath, JSON.stringify(authors, null, 2), (err) => {
-      if (err) {
-        return res.status(500).json({ error: 'Failed to save author' });
-      }
-      res.status(201).json(newAuthor);
+// const createAuthor = async (req, res) => {
+//   const { name, picture } = req.body;
+//   try {
+//     const newAuthor = await prisma.author.create({
+//       data: { name, picture },
+//     });
+//     res.status(201).json(newAuthor);
+//   } catch (error) {
+//     res.status(500).json({ error: 'Failed to create author' });
+//   }
+// };
+
+const createAuthor = async (req, res) => {
+  const { name, picture } = req.body;
+  const userId = req.user.userId;
+  console.log(req);
+  try {
+    const newAuthor = await prisma.author.create({
+      // data: { name, picture, createdBy: userId },
+      data: { name, picture },
     });
-  });
+    res.status(201).json(newAuthor);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Failed to create author' });
+  }
 };
 
-const updateAuthor = (req, res) => {
+const updateAuthor = async (req, res) => {
   const authorId = parseInt(req.params.id, 10);
-  const updatedAuthor = req.body;
-  fs.readFile(authorsFilePath, 'utf8', (err, data) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to read authors data' });
-    }
-    let authors = JSON.parse(data);
-    const authorIndex = authors.findIndex(a => a.id === authorId);
-    if (authorIndex === -1) {
+  const { name, picture } = req.body;
+  try {
+    const updatedAuthor = await prisma.author.update({
+      where: { id: authorId },
+      data: { name, picture },
+    });
+    res.json(updatedAuthor);
+  } catch (error) {
+    if (error.code === 'P2025') {
       return res.status(404).json({ error: 'Author not found' });
     }
-    authors[authorIndex] = { ...authors[authorIndex], ...updatedAuthor };
-    fs.writeFile(authorsFilePath, JSON.stringify(authors, null, 2), (err) => {
-      if (err) {
-        return res.status(500).json({ error: 'Failed to update author' });
-      }
-      res.json(authors[authorIndex]);
-    });
-  });
+    res.status(500).json({ error: 'Failed to update author' });
+  }
 };
 
-const deleteAuthor = (req, res) => {
+const deleteAuthor = async (req, res) => {
   const authorId = parseInt(req.params.id, 10);
-  fs.readFile(authorsFilePath, 'utf8', (err, data) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to read authors data' });
-    }
-    let authors = JSON.parse(data);
-    authors = authors.filter(a => a.id !== authorId);
-    fs.writeFile(authorsFilePath, JSON.stringify(authors, null, 2), (err) => {
-      if (err) {
-        return res.status(500).json({ error: 'Failed to delete author' });
-      }
-      res.status(204).send();
+  try {
+    await prisma.author.delete({
+      where: { id: authorId },
     });
-  });
+    res.status(204).send();
+  } catch (error) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Author not found' });
+    }
+    res.status(500).json({ error: 'Failed to delete author' });
+  }
 };
 
 module.exports = {
