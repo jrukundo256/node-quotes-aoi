@@ -1,6 +1,10 @@
 name: Node.js CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
@@ -8,28 +12,40 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '14'
-    - run: npm ci
+        node-version: '20'
+
+    - name: List files in working directory
+      run: ls -R
+
+    - name: Generate Prisma Client
+      run: npx prisma generate
+
+    - name: Install dependencies
+      run: npm ci
+
     - name: Run tests with increased logging
       run: |
         echo "Running tests with increased logging..."
-        NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --verbose --detectOpenHandles
+        NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --verbose --detectOpenHandles > test-output.log 2>&1
       env:
-        DEBUG: 'app,app:*'  # Adjust this based on your logging setup
-    - name: Output server logs if tests fail
+        DEBUG: 'app,app:*'
+
+    - name: Output test logs if tests fail
       if: failure()
-      run: |
-        echo "Test failure detected. Outputting server logs..."
-        cat server.log  # Adjust the filename as needed
+      run: cat test-output.log
+
     - name: Upload test artifacts
       if: always()
       uses: actions/upload-artifact@v3
       with:
         name: test-results
         path: |
-          test-results
+          test-output.log
           coverage
-          server.log
+
+    - name: List files after test run
+      run: ls -R
