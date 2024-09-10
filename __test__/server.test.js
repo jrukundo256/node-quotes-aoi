@@ -14,11 +14,21 @@ const { PrismaClient } = require('@prisma/client');
 // });
 
 describe('User Endpoints', () => {
+  // it('should get all users', async () => {
+  //   const res = await request(app).get('/auth/users');
+  //   expect(res.statusCode).toBe(200);
+  //   expect(Array.isArray(res.body)).toBe(true);
+  // });
+
+  // Add more tests as needed
+
   it('should get all users', async () => {
     const res = await request(app).get('/auth/users');
+    if (res.statusCode !== 200) {
+      console.error('Response body:', res.body);
+    }
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
-
-  // Add more tests as needed
 });
+
