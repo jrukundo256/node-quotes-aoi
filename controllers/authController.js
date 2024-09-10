@@ -6,12 +6,22 @@ const prisma = new PrismaClient();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'kanzu123';
 
+// const getUsers = async (req, res) => {
+//     try {
+//         const users = await prisma.user.findMany();
+//         res.json(users);
+//     } catch (error) {
+//         res.status(500).json({ error: 'Failed to fetch users..' });
+//     }
+// };
+
 const getUsers = async (req, res) => {
     try {
         const users = await prisma.user.findMany();
         res.json(users);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch users..' });
+        console.error('Error fetching users:', error);
+        res.status(500).json({ error: 'Failed to fetch users..', details: error.message });
     }
 };
 

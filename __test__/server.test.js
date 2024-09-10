@@ -22,6 +22,20 @@ describe('User Endpoints', () => {
 
   // Add more tests as needed
 
+  // In a separate test file or at the beginning of your test suite
+test('Database connection', async () => {
+  try {
+    await prisma.$connect();
+    // If we get here, the connection was successful
+    expect(true).toBe(true);
+  } catch (error) {
+    console.error('Database connection error:', error);
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+});
+
   it('should get all users', async () => {
     const res = await request(app).get('/auth/users');
     if (res.statusCode !== 200) {

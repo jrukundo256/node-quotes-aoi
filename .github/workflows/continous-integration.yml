@@ -33,6 +33,7 @@ jobs:
         NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --verbose --detectOpenHandles > test-output.log 2>&1
       env:
         DEBUG: 'app,app:*'
+        DATABASE_URL: "postgresql://postgres:a11iswe11@localhost:5432/quotes-api-db?schema=public"
 
     - name: Output test logs if tests fail
       if: failure()
